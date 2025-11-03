@@ -15,7 +15,7 @@ interface NoteFormProps {
   onSuccess: () => void;
 }
 
-export default function NoteForm({ onClose, onSuccess }: NoteFormProps) {
+export default function NoteForm({ onSuccess }: NoteFormProps) {
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { draft, setDraft, clearDraft } = useNoteDraftStore();
@@ -23,11 +23,11 @@ export default function NoteForm({ onClose, onSuccess }: NoteFormProps) {
 
   const mutation = useMutation({
     mutationFn: (newNote: typeof draft) => createNote(newNote),
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       clearDraft();
       onSuccess();
-      router.push(`/notes/${ data.id }`); 
+      router.push(`/notes/filter/all`); 
     },
   });
 
@@ -41,7 +41,8 @@ export default function NoteForm({ onClose, onSuccess }: NoteFormProps) {
     const { name, value } = e.target;
     setDraft({ ...draft, [name]: value });
   };
-
+  const handleCancel = () => router.push('/notes/filter/all');
+  
   return (
     <form className={css.form} onSubmit={handleSubmit}>
       <div className={css.formGroup}>
@@ -50,7 +51,7 @@ export default function NoteForm({ onClose, onSuccess }: NoteFormProps) {
           type="text"
           id="title"
           name="title"
-          value={draft.title}
+          value={draft?.title}
           onChange={handleChange}
           required
           minLength={3}
@@ -64,7 +65,7 @@ export default function NoteForm({ onClose, onSuccess }: NoteFormProps) {
         <textarea
           id="content"
           name="content"
-          value={draft.content}
+          value={draft?.content}
           onChange={handleChange}
           rows={8}
           maxLength={500}
@@ -77,7 +78,7 @@ export default function NoteForm({ onClose, onSuccess }: NoteFormProps) {
         <select
           id="tag"
           name="tag"
-          value={draft.tag}
+          value={draft?.tag}
           onChange={handleChange}
           required
           className={css.select}
@@ -92,7 +93,7 @@ export default function NoteForm({ onClose, onSuccess }: NoteFormProps) {
       </div>
 
       <div className={css.actions}>
-        <button type="button" className={css.cancelButton} onClick={onClose}>
+        <button type="button" className={css.cancelButton} onClick={handleCancel}>
           Cancel
         </button>
         <button type="submit" className={css.submitButton} disabled={isSubmitting}>
